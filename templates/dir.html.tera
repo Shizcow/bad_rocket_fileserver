@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Tera Demo</title>
+  </head>
+  <body>
+    <h1>Contents of {{dirname}}:</h1>
+    <ul>
+        {% for s in items %}
+            <li><a href="{{s[1]}}">{{s[0]}}</a></li>
+        {% endfor %}
+    </ul>
+  </body>
+</html>
