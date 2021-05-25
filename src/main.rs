@@ -13,8 +13,15 @@ use rocket::{get, response::NamedFile, routes};
 use rocket_contrib::templates::Template;
 
 use std::path::PathBuf;
+use std::sync::RwLock;
 
 use serde_derive::Serialize;
+
+use clap::{App, Arg};
+
+lazy_static::lazy_static! {
+    static ref PUBDIR: RwLock<PathBuf> = RwLock::new(PathBuf::new());
+}
 
 #[derive(Serialize)]
 struct TemplateContext {
@@ -29,11 +36,14 @@ fn get_public_none() -> Result<Option<NamedFile>, Template> {
 
 #[get("/public/<filename..>")]
 fn get_public(filename: PathBuf) -> Result<Option<NamedFile>, Template> {
+    // server-ready path of the file
     let path_name = PathBuf::from("public").join(filename.clone());
-    let smbroot = PathBuf::from("/home/notroot/smbshare");
-    let fdir = smbroot.join(path_name.clone());
+
+    // absolute path of the file
+    let fdir = PUBDIR.read().unwrap().join(filename.clone());
 
     if fdir.is_dir() {
+        // GUI for choosing a file
         let context = TemplateContext {
             dirname: path_name.to_string_lossy().to_string(),
             items: fdir
@@ -43,7 +53,7 @@ fn get_public(filename: PathBuf) -> Result<Option<NamedFile>, Template> {
                     if let Ok(entry) = entry {
                         Some([
                             entry.file_name().to_string_lossy().to_string(),
-                            filename
+                            path_name
                                 .clone()
                                 .join(entry.file_name())
                                 .to_string_lossy()
@@ -63,8 +73,25 @@ fn get_public(filename: PathBuf) -> Result<Option<NamedFile>, Template> {
 }
 
 fn main() {
+    let matches = App::new("Bad File Server")
+        .version("0.2")
+        .about("A Rocket-based http fileserver with minimal web GUI")
+        .arg(Arg::with_name("pubdir")
+             .long("pubdir")
+             .value_name("DIRECTORY")
+             .help("Location of the public directory. Mounted on http://url/public and openly accessible")
+             .takes_value(true))
+	.get_matches();
+
+    let mut used_routes = routes![];
+
+    if let Some(pubdir) = matches.value_of("pubdir") {
+        used_routes.append(&mut routes![get_public_none, get_public]);
+        *(PUBDIR.write().unwrap()) = PathBuf::from(pubdir);
+    }
+
     rocket::ignite()
-        .mount("/", routes![get_public_none, get_public])
+        .mount("/", used_routes)
         .attach(Template::fairing())
         .launch();
 }
