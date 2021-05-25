@@ -1,5 +1,7 @@
 [development]
-template_dir = "/usr/share/rocket_fs/templates"
+template_dir = "templates"
+port = 8000
 
 [production]
 template_dir = "/usr/share/rocket_fs/templates"
+port = 80
