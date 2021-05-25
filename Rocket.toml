@@ -1,0 +1,5 @@
+[development]
+template_dir = "/opt/rocket_fs/templates"
+
+[production]
+template_dir = "/opt/rocket_fs/templates"
