@@ -1,0 +1,13 @@
+[Unit]
+Description=A fileserver
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/share/rocket_fs
+ExecStart=rocket_fs --pubdir /home/notroot/smbshare/public/
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

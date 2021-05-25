@@ -26,4 +26,5 @@ package() (
   install -Dm644 -d "$srcdir"/"$pkgname"/templates "$pkgdir"/usr/share/rocket_fs/templates
   install -Dm644 "$srcdir"/"$pkgname"/templates/dir.html.tera "$pkgdir"/usr/share/rocket_fs/templates/dir.html.tera
   install -Dm755 "$srcdir"/"$pkgname"/target/release/rocket_fs "$pkgdir"/usr/bin/rocket_fs
+  install -Dm777 "$srcdir"/"$pkgname"/rocket-fs.service "$pkgdir"/etc/systemd/system/multi-user.target.wants/rocket-fs.service
 )
